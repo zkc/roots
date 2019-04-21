@@ -1,0 +1,17 @@
+{
+  "name": "native-roots",
+  "version": "1.0.0",
+  "description": "code challenge api",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kyle Zucker",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.18.3",
+    "express": "^4.16.4",
+    "nconf": "^0.10.0"
+  }
+}
