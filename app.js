@@ -55,7 +55,7 @@ app.post('/harvests', async (req, res) => {
   try {
     await knex('harvests').insert(harvestRow)
   } catch (e) {
-    console.log(e) //logger
+    //logger here
     res.status(500).send('DB insert error')
     // catches on unknown strain
     return
