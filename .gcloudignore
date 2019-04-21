@@ -3,3 +3,6 @@
 .gitignore
 
 node_modules/
+
+native-roots-kz-5efd07c0901b.json
+cloud_sql_proxy_x64.exe
