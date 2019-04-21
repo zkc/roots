@@ -12,7 +12,7 @@ app.use(bodyParser.json())
 const knex = dbConnect()
 
 function convertGramsToPounds (grams) {
-  return Math.round(grams / 453.59237)
+  return grams / 453.59237
 }
 
 app.get('/', (req, res) => {
@@ -57,7 +57,7 @@ app.post('/harvests', async (req, res) => {
     id: uuid(), 
     date: new Date().toISOString().split('T')[0], 
   }
-  
+
   let bay = await knex('bays').where({ id : newHarvest.bay })
   bay = bay[0] //find one?
 
