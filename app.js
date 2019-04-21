@@ -9,7 +9,6 @@ const dbConnect = require('./db')
 const app = express()
 app.use(bodyParser.json())
 
-
 const knex = dbConnect()
 
 function convertGramsToPounds (grams) {
@@ -33,16 +32,14 @@ app.get('/', (req, res) => {
 }
 */
 
-app.get('/test-bay', (req, res) => {
+app.get('/test-bay', (req, res) => { 
   knex('bays').where({id : "nw-615"})
     .then(row => {
       res.status(200).send({row})
     })
-
 })
 
-app.post('/harvests', (req, res) => {
-  // console.log(req.body)
+app.post('/harvests', async (req, res) => {
   // confirm all good
 
   // add to DB
@@ -55,26 +52,76 @@ app.post('/harvests', (req, res) => {
   // date 
   // id - pk
 
+  let bay = await knex('bays').where({ id : newHarvest.bay })
+  bay = bay[0] //find one?
+
+  if (!bay) {
+    res.status(400).send(`bay: ${newHarvest.bay} not found`)
+    return
+  }
+  
   const newHarvest = {
+    ...req.body, 
     id: uuid(), 
-    date: Date(), 
-    plant_count: req.body.plantCount,
-    harvest_grams: req.body.harvestGrams,
-    total_plant_grams: req.body.totalPlantGrams, 
-    classification: req.body.classification,
-    bay: req.body.bay, // confirm bay exists 
-    strain: req.body.strain, // confirm exists
+    date: new Date().toISOString().split('T')[0], 
   }
 
-  knex('harvests').insert(newHarvest).then(r => {
-    console.log(r)
+  const harvestRow = {
+    id: newHarvest.id,
+    date: newHarvest.date,
+    plant_count: newHarvest.plantCount,
+    harvest_grams: newHarvest.harvestGrams,
+    total_plant_grams: newHarvest.totalPlantGrams, 
+    classification: newHarvest.classification,
+    bay: newHarvest.bay, 
+    strain: newHarvest.strain, // confirm exists
+  }
 
-  })
+  try {
+    await knex('harvests').insert(harvestRow)
+  } catch (e) {
+    console.log(e) //logger
+    res.status(500).send('DB insert error')
+    // catches on unknown strain
+    return
+  }
 
 
   // generate response
+  /*
+  {
+  "id": "uih4r9u8ewafu",
+  "plantCount": 528,
+  "harvestGrams": 202,
+  "totalPlantGrams": 3410,
+  "classification": "REC",
+  "bay": "nw-615",
+  "strain": "PEX",
+  "date": "01/01/2019",
+  
+  "totalPlantLbs": 7.6116071429, -
+  "harvestLbs": 0.4508928571, -
 
-  res.status(201).send('nice harvest')
+  "percentHarvestedPlantWeight": 5.923753666,
+  "lbsHarvestedPerSqFt": 0.008318696331,
+  "plantsPerLight": 9.4285714286, --- need bay!
+  "harvestLbsPerLight": 0.008051658162,
+  "sqFtPerPlant": 0.5770491803
+  }
+
+  bay: 
+  id
+  light_count
+  square_footage 
+  */
+  newHarvest.harvestLbs = convertGramsToPounds(newHarvest.harvestGrams)
+  newHarvest.totalPlantLbs = convertGramsToPounds(newHarvest.harvestLbs)
+  newHarvest.percentHarvestedPlantWeight = (newHarvest.harvestGrams / newHarvest.totalPlantGrams)
+  newHarvest.lbsHarvestedPerSqFt = (newHarvest.harvestLbs / bay.square_footage)
+  newHarvest.harvestLbsPerLight = (newHarvest.harvestLbs / bay.light_count)
+  newHarvest.sqFtPerPlant = (bay.square_footage / newHarvest.plantCount)
+
+  res.status(201).send(newHarvest)
 })
 
 // get harvests
