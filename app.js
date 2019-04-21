@@ -52,6 +52,12 @@ app.post('/harvests', async (req, res) => {
   // date 
   // id - pk
 
+  const newHarvest = {
+    ...req.body, 
+    id: uuid(), 
+    date: new Date().toISOString().split('T')[0], 
+  }
+  
   let bay = await knex('bays').where({ id : newHarvest.bay })
   bay = bay[0] //find one?
 
@@ -59,12 +65,7 @@ app.post('/harvests', async (req, res) => {
     res.status(400).send(`bay: ${newHarvest.bay} not found`)
     return
   }
-  
-  const newHarvest = {
-    ...req.body, 
-    id: uuid(), 
-    date: new Date().toISOString().split('T')[0], 
-  }
+
 
   const harvestRow = {
     id: newHarvest.id,
@@ -148,7 +149,13 @@ Parameters
     Default: DESC.
     String
 */
-// app.get()
+// app.get('/harvests', (req, res) => {
+//   // check query
+
+//   // get from db
+
+//   // return list  
+// })
 
 const server = app.listen(config.get('PORT'), () => {
   const port = server.address().port
