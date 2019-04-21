@@ -8,7 +8,9 @@ function connect() {
     database: process.env.DB_NAME || 'native',
   };
 
-  config.host = `/cloudsql/${process.env.CLOUD_SQL_CONNECTION_NAME || 'native-roots-kz:us-central1:native-roots-kz'}`;
+  if (process.env.NODE_ENV === 'production') {
+    config.host = `/cloudsql/${process.env.CLOUD_SQL_CONNECTION_NAME || 'native-roots-kz:us-central1:native-roots-kz'}`;
+  }
 
   // Establish a connection to the database
   const knex = Knex({
